@@ -1,0 +1,28 @@
+# OCI credentials
+oci_tenancy_ocid     = "ocid1.tenancy.oc1..example"
+oci_user_ocid        = "ocid1.user.oc1..example"
+oci_fingerprint      = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+oci_region           = "ap-batam-1"
+oci_compartment_ocid = "ocid1.compartment.oc1..example"
+oci_private_key = <<EOF
+-----BEGIN PRIVATE KEY-----
+nMIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
+-----END PRIVATE KEY-----
+EOF
+
+# Compute
+oci_instance_shape          = "VM.Standard.A1.Flex"
+oci_instance_ocpus          = 1
+oci_instance_memory_in_gbs  = 6
+oci_boot_volume_size_in_gbs = 100
+oci_availability_domain     = ""
+oci_ssh_public_key          = "ssh-rsa AAAA... user@host"
+
+# GitHub Actions runner
+gh_org_name       = "jatilab"
+gh_runner_name    = "skripsi-server"
+gh_pat            = "github_pat_..."
+gh_runner_version = "v2.335.1"
+gh_runner_os      = "linux"
+gh_runner_arch    = "arm64"
+gh_runner_sha256  = "your-runner-sha256-checksum"

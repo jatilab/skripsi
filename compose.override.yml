@@ -1,0 +1,14 @@
+services:
+  app:
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-localhost}
+      APP_SECRET: ${APP_SECRET:-development-secret-change-me}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - target: 3000
+        published: 3000
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.app.rule=Host(`${APP_DOMAIN:-localhost}`)
+    deploy:
+      replicas: 1
