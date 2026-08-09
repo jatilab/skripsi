@@ -17,9 +17,9 @@ services:
       - private
     healthcheck:
       test: ['CMD', 'node', 'scripts/healthcheck.mjs']
-      interval: 2s
-      timeout: 2s
-      retries: 2
+      interval: 10s
+      timeout: 5s
+      retries: 5
       start_period: 10s
     deploy:
       replicas: 3
