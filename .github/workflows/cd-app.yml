@@ -25,9 +25,9 @@ jobs:
         with:
           context: .
           platforms: linux/arm64
-          push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          push: true
           tags: |
             ghcr.io/${{ github.repository }}/skripsi-app:sha-${{ github.sha }}
             ghcr.io/${{ github.repository }}/skripsi-app:latest
