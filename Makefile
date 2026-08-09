@@ -1,4 +1,4 @@
-.PHONY: check fix build test
+.PHONY: check fix build test k6 k6-tolerate
 .PHONY: infra-up infra-down infra-network db-reset infra-deploy infra-destroy
 .PHONY: up down migrate healthcheck pipeline
 .PHONY: deploy deploy-pipeline swarm-guard swarm-healthcheck destroy
@@ -17,6 +17,15 @@ fix:
 
 test:
 	pnpm test
+
+k6:
+	$(ENV_SWARM) docker rm -f skripsi-k6 >/dev/null 2>&1 || true
+	$(ENV_SWARM) docker run --name skripsi-k6 -v "$$PWD/k6:/k6:ro" -e APP_DOMAIN=$$APP_DOMAIN -e DURATION=$$K6_DURATION grafana/k6 run --summary-export=/tmp/k6-results.json /k6/script.js
+	$(ENV_SWARM) docker cp skripsi-k6:/tmp/k6-results.json k6/results.json
+	$(ENV_SWARM) docker rm -f skripsi-k6 >/dev/null
+
+k6-tolerate:
+	-$(MAKE) k6
 
 build:
 	docker build -t skripsi-app .
@@ -68,7 +77,7 @@ deploy-pipeline: swarm-guard
 	$(MAKE) check
 	$(MAKE) build
 	$(MAKE) infra-deploy
-	$(MAKE) deploy
+	$(MAKE) -j2 deploy k6-tolerate
 	$(MAKE) swarm-healthcheck
 
 swarm-guard:
