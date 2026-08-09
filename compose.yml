@@ -32,3 +32,4 @@ services:
         - traefik.enable=true
         - traefik.http.routers.app.rule=Host(`${APP_DOMAIN}`)
         - traefik.http.services.app.loadbalancer.server.port=3000
+        - traefik.swarm.lbswarm=true
