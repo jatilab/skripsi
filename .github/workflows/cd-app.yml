@@ -1,7 +1,22 @@
 name: CD App
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'drizzle/**'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'compose.yml'
+      - 'next.config.ts'
+      - 'tsconfig.json'
+      - 'postcss.config.mjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
 
 concurrency: cd-app-deploy
 
