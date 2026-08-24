@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# skripsi
 
-## Getting Started
+A basic Next.js web application (auth via Better Auth + Drizzle) used as the test payload for an automated deployment pipeline: CI/CD with GitHub Actions, containerization with Docker, orchestration with Docker Swarm, infrastructure-as-code with Terraform (OCI) via Terraform Cloud, reverse proxying with Traefik, and exposure through Cloudflare Tunnel.
 
-First, run the development server:
+The production environment is provisioned and deployed entirely from this repository.
+
+## Getting Started (development)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm format:check   # prettier check
+pnpm lint           # eslint
+pnpm test           # vitest
+```
 
-## Learn More
+Local stack runs via Docker Compose (`make up`, `make down`, `make migrate`, `make healthcheck`).
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Three GitHub Actions workflows run on a self-hosted runner provisioned on the OCI server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Workflow       | Trigger                                   | What it does                                                                                            |
+| -------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ci.yml`       | Every push (except `infra/**`, `docs/**`) | Prettier check, ESLint, Vitest; image build verification on `main`                                      |
+| `cd-app.yml`   | push to `main` (app-relevant paths)       | Build & push image to GHCR, migrate DB, `docker stack deploy`, k6 verification                          |
+| `cd-infra.yml` | `infra/**` changes                        | Terraform Cloud run: provisions the OCI server via cloud-init (Docker + Swarm), deploys the infra stack |
 
-## Deploy on Vercel
+Traffic path: Cloudflare Tunnel → Traefik → app replicas (3, behind Swarm's internal LB `lbswarm`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Manual equivalents live in the `Makefile` (`make pipeline`, `make deploy-pipeline`, `make k6`).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Key directories:
+
+| Path                 | Purpose                                                         |
+| -------------------- | --------------------------------------------------------------- |
+| `compose.yml`        | App stack (3 replicas, healthcheck, Traefik labels + `lbswarm`) |
+| `infra/compose.yml`  | Infra stack (Postgres, pgbouncer, Traefik, cloudflared)         |
+| `infra/terraform/`   | OCI infrastructure-as-code + cloud-init bootstrap               |
+| `.github/workflows/` | CI, CD App, CD Infra pipelines                                  |
+| `k6/`                | Deployment availability verification                            |
+
+## Health endpoints
+
+- `/livez` — liveness (instant 200)
+- `/readyz` — readiness (200 when the database is reachable)
+
+Both are integrated into the Docker `HEALTHCHECK`.
