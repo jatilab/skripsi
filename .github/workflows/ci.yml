@@ -1,6 +1,10 @@
 name: CI
 
-on: push
+on:
+  push:
+    paths-ignore:
+      - 'infra/**'
+      - 'docs/**'
 
 permissions:
   contents: read
@@ -22,6 +26,7 @@ jobs:
 
   build:
     needs: checks
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v7
