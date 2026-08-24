@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths: ['infra/**']
-  workflow_dispatch:
 
 concurrency: cd-infra-deploy
 
